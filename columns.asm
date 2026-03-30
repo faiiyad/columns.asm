@@ -116,16 +116,15 @@ match_flags:
     .globl main
 
 main:
+    jal select_difficulty
     jal  pick_random_colors
     jal  draw_background
-    # jal  draw_diff_select_screen
     jal  draw_field
     jal  draw_walls
     jal  draw_current_column
 
 game_loop:
     jal  handle_keyboard
-
     lw   $t0, frame_counter
     addi $t0, $t0, 1
     lw   $t1, FALL_DELAY
@@ -421,13 +420,13 @@ draw_bg_done:
     jr   $ra
 
 
-# draw_diff_select_screen:
-#     lw 
-
 
 select_difficulty:
   add $sp, $sp, -4
   sw $ra, 0($sp)
+
+  jal draw_background
+  jal draw_difficulty_screen
 
 diff_loop:
     lw   $t0, ADDR_KBRD
@@ -465,6 +464,118 @@ diff_done:
   lw $ra, 0($sp)
   addi $sp, $sp, 4
   jr $ra
+
+
+draw_difficulty_screen:
+    addi $sp, $sp, -16
+    sw   $ra, 0($sp)
+    sw   $s0, 4($sp)
+    sw   $s1, 8($sp)
+    sw   $s2, 12($sp)
+
+    # green=easy, yellow=mid red = hard
+    # green block x=13..17, y=2..6
+    li   $s0, 2
+dds_green_row:
+    bgt  $s0, 6, dds_green_done
+    li   $s1, 13
+dds_green_col:
+    bgt  $s1, 17, dds_green_next_row
+    move $a0, $s1
+    move $a1, $s0
+    li   $a2, 0x00AA00
+    jal  draw_unit
+    addi $s1, $s1, 1
+    j    dds_green_col
+dds_green_next_row:
+    addi $s0, $s0, 1
+    j    dds_green_row
+dds_green_done:
+    li   $s0, 3
+dds_I_loop:
+    bgt  $s0, 5, dds_I_done
+    li   $a0, 15
+    move $a1, $s0
+    li   $a2, 0x00FF00
+    jal  draw_unit
+    addi $s0, $s0, 1
+    j    dds_I_loop
+dds_I_done:
+
+    # yellow block x=13 to 17, y=9 to 13
+    li   $s0, 9
+dds_yellow_row:
+    bgt  $s0, 13, dds_yellow_done
+    li   $s1, 13
+dds_yellow_col:
+    bgt  $s1, 17, dds_yellow_next_row
+    move $a0, $s1
+    move $a1, $s0
+    li   $a2, 0xAAAA00
+    jal  draw_unit
+    addi $s1, $s1, 1
+    j    dds_yellow_col
+dds_yellow_next_row:
+    addi $s0, $s0, 1
+    j    dds_yellow_row
+dds_yellow_done:
+    li   $s0, 10
+dds_II_loop:
+    bgt  $s0, 12, dds_II_done
+    li   $a0, 14
+    move $a1, $s0
+    li   $a2, 0xFFFF00
+    jal  draw_unit
+    li   $a0, 16
+    move $a1, $s0
+    li   $a2, 0xFFFF00
+    jal  draw_unit
+    addi $s0, $s0, 1
+    j    dds_II_loop
+dds_II_done:
+
+    # red block x=13 to 17, y=16 to 20
+    li   $s0, 16
+dds_red_row:
+    bgt  $s0, 20, dds_red_done
+    li   $s1, 13
+dds_red_col:
+    bgt  $s1, 17, dds_red_next_row
+    move $a0, $s1
+    move $a1, $s0
+    li   $a2, 0xAA0000
+    jal  draw_unit
+    addi $s1, $s1, 1
+    j    dds_red_col
+dds_red_next_row:
+    addi $s0, $s0, 1
+    j    dds_red_row
+dds_red_done:
+    li   $s0, 17
+dds_III_loop:
+    bgt  $s0, 19, dds_III_done
+    li   $a0, 13
+    move $a1, $s0
+    li   $a2, 0xFF0000
+    jal  draw_unit
+    li   $a0, 15
+    move $a1, $s0
+    li   $a2, 0xFF0000
+    jal  draw_unit
+    li   $a0, 17
+    move $a1, $s0
+    li   $a2, 0xFF0000
+    jal  draw_unit
+    addi $s0, $s0, 1
+    j    dds_III_loop
+dds_III_done:
+
+    lw   $ra, 0($sp)
+    lw   $s0, 4($sp)
+    lw   $s1, 8($sp)
+    lw   $s2, 12($sp)
+    addi $sp, $sp, 16
+    jr   $ra
   
 
 # x=[11, 20], y=[1, 20] 
