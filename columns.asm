@@ -31,6 +31,9 @@ KEY_D:  .word 0x64   # right
 KEY_W:  .word 0x77   # change order
 KEY_S:  .word 0x73   # down
 KEY_Q:  .word 0x71   # exit
+KEY_1:  .word 0x31   # 1 -> default
+KEY_2:  .word 0x32   # 2 -> med
+KEY_3:  .word 0x33   # 3 -> insaneeeeeeee
 
 # boundaries
 FIELD_X_MIN: .word 11   # left wall
@@ -40,8 +43,16 @@ FIELD_Y_MAX: .word 20   # base
 # 60fps (sleep duration)
 SLEEP_MS:    .word 16
 
+
+#global clock 
+TIMER: .word 0
+
 # gravity time
-FALL_DELAY:  .word 30
+FALL_DELAY:  .word 40
+FALL_DELAY_MID: .word 25
+FALL_DELAY_HARD: .word 10
+# todo: remember to make it look pretty with proper spacing cuz why not xd
+
 
 # frames since last gravity 
 frame_counter: .word 0
@@ -107,6 +118,7 @@ match_flags:
 main:
     jal  pick_random_colors
     jal  draw_background
+    # jal  draw_diff_select_screen
     jal  draw_field
     jal  draw_walls
     jal  draw_current_column
@@ -118,10 +130,11 @@ game_loop:
     addi $t0, $t0, 1
     lw   $t1, FALL_DELAY
     blt  $t0, $t1, gl_no_drop
-
     li   $t0, 0
     sw   $t0, frame_counter
     jal  auto_drop
+    
+    jal log_FD
     j    gl_sleep
 
 gl_no_drop:
@@ -131,12 +144,40 @@ gl_sleep:
     li   $v0, 32
     lw   $a0, SLEEP_MS
     syscall
-
+    lw $t0, TIMER
+    addi $t0, $t0, 1
+    sw $t0, TIMER
+    li $t1, 1000
+    beq $t0, $t1, auto_diff
     j game_loop
 
 
 
 # 0xffff0000 -> 1 -> new key; 0xffff0004 -> ASCII
+
+log_FD:
+  lw   $a0, FALL_DELAY
+  li   $v0, 1
+  syscall
+  
+  li   $a0, 10
+  li   $v0, 11
+  syscall
+
+  jr $ra
+
+
+auto_diff:
+  lw $t0, FALL_DELAY
+  ble $t0, 1, auto_d_done
+  addi $t0, $t0, -1
+  sw $t0, FALL_DELAY
+  sw $zero, TIMER
+  
+auto_d_done:
+  jr $ra
+  
+
 
 handle_keyboard:
     addi $sp, $sp, -4
@@ -378,6 +419,53 @@ draw_bg_loop:
 
 draw_bg_done:
     jr   $ra
+
+
+# draw_diff_select_screen:
+#     lw 
+
+
+select_difficulty:
+  add $sp, $sp, -4
+  sw $ra, 0($sp)
+
+diff_loop:
+    lw   $t0, ADDR_KBRD
+    lw   $t1, 0($t0)
+    bne  $t1, 1, diff_loop # keep waiting
+
+    lw   $t2, 4($t0) # ASCII of new key
+
+    lw   $t3, KEY_1
+    beq  $t2, $t3, set_easy
+
+    lw   $t3, KEY_2
+    beq  $t2, $t3, set_medium
+
+    lw   $t3, KEY_3
+    beq  $t2, $t3, set_hard
+
+    j    diff_loop
+
+set_easy:
+    j   diff_done
+
+
+set_medium:
+    lw  $t0, FALL_DELAY_MID
+    sw  $t0, FALL_DELAY
+    j   diff_done
+
+set_hard:
+    lw  $t0, FALL_DELAY_HARD
+    sw  $t0, FALL_DELAY
+    j   diff_done
+
+diff_done:
+  lw $ra, 0($sp)
+  addi $sp, $sp, 4
+  jr $ra
+  
 
 # x=[11, 20], y=[1, 20] 
 draw_field:
