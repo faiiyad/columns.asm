@@ -1,0 +1,188 @@
+\documentclass{article}
+
+%% Page Margins %%
+\usepackage{geometry}
+\usepackage{colortbl}   % for \rowcolor
+\usepackage{xcolor}     % for \textcolor and [HTML] colour spec
+\usepackage{array}      % for p{} column type
+\geometry{
+    top = 0.75in,
+    bottom = 0.75in,
+    right = 0.75in,
+    left = 0.75in,
+}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{parskip}
+
+\title{Assembly Project: COLUMNS}
+
+% TODO: Enter your name
+\author{Faiyad Ahmed Masnoon}
+
+\begin{document}
+\maketitle
+
+\section{Instruction and Summary}
+
+\begin{enumerate}
+
+    \item Which milestones were implemented? \\
+    % TODO: List the milestone(s) and in the case of 
+    %       Milestones 4 & 5, list what features you 
+    %       implemented, sorted into easy and hard 
+    %       categories.
+    \textbf{Answer: } Milestones 1, 2, 3, 4 and 5 (6 easy features + 1 hard). 
+
+    \item How to view the game:
+    % TODO: specify the pixes/unit, width and height of 
+    %       your game, etc.  NOTE: list these details in
+    %       the header of your breakout.asm file too!
+    
+    \begin{enumerate}
+
+    \item Set bitmap size to 256x256
+    \item Set units to 8 for both height and width
+    \item Set base address for display: 0x10008000 (\$gp)
+    \item Run the columns.asm file (I used Saturn IDE).
+
+    \end{enumerate}
+
+\item Game Summary:
+% TODO: Tell us a little about your game.
+\begin{itemize}
+\item Implementation of the Columns game in assembly!
+\item The game generates a 3x1 column at the top of the screen, that falls down. If there is a match, the gems disappear. If any gem touches the top of the playable area, the game ends.\\Also has score counter, gravity, ghost outline, difficulty select and more!
+\end{itemize}
+
+    
+\end{enumerate}
+
+% \section{Attribution Table}
+% % TODO: If you worked in partners, tell us who was 
+% %       responsible for which features. Some reweighting 
+% %       might be possible in cases where one group member
+% %       deserves extra credit for the work they put in.
+
+% \begin{center}
+% \begin{tabular}{|| c | c ||}
+% \hline
+%  Student 1 (Name and student number) &  Student 2 (Name and student number) \\ 
+%  \hline
+%  Task & Task\\
+%  \hline
+%  Task & Task\\
+%  \hline
+%  Task & Task\\ 
+%  \hline
+%  Task & Task\\ 
+%  \hline
+%  Task & Task\\
+%  \hline
+%  Task & Task\\  
+%  \hline
+% \end{tabular}
+% \end{center}
+
+% TODO: Fill out the remainder of the document as you see 
+%       fit, including as much detail as you think 
+%       necessary to better understand your code. 
+%       You can add extra sections and subsections to 
+%       help us understand why you deserve marks for 
+%       features that were more challenging than they
+%       might initially seem.
+
+\section{How to Play}
+\begin{enumerate}
+    \item Input 1, 2 or 3 depending on how difficult you want the game to be. 1: easy; 2: medium; 3:hard. Do note that the difficulty increases over time regardless of initial choice. Choosing medium or hard difficulty will provide a score multiplier.
+    \item A column will be spawned near the top. Use A/D to move the column left or right. 
+    \item Use S to move the column downwards.
+    \item Use W to shuffle the order of the gems in the column.
+    \item There will be an outline to show where the column will land.
+    \item Press P to pause the game.
+    \item If you run out of space, the game will end. Press R to retry or Q to exit the game completely.
+\end{enumerate}
+
+\newpage
+
+\section{Extra Details}
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=0.3\textwidth]{state.png}
+        \caption{Columns, showing the score counter, pause symbol and ghost outline!}
+        \label{Instructions}
+    \end{figure}
+
+    \textbf{Easy features implemented (6):}
+    \begin{enumerate}
+        \item \textbf{Gravity (\#1): } Spawned column will move down by itself.
+        \item \textbf{Auto increase in gravity (\#2): } Over time, the column will fall faster, increasing the difficulty. This is set to increase every 10s (every 600 frames). \\
+        To change this you can edit line 182.
+        \item \textbf{Difficulty selection (\#3): } Once you start the game, you can choose the difficulty. Enter 1, 2 or 3.
+        \begin{figure}[ht!]
+            \centering
+            \includegraphics[width=0.2\textwidth]{difficulty.png}
+            \caption{Difficulty select screen}
+            \label{Instructions}
+        \end{figure}
+        \item \textbf{Game Over + Retry (\#4): } Once the new column has no place to spawn (already occupied by previous gems), the game ends. The screen turns red and there is a big R in the screen, representing the option to Retry. You can press R to retry, or Q to quit.\\
+        Retrying resets the score, and starts a new game.
+        \begin{figure}[ht!]
+            \centering
+            \includegraphics[width=0.2\textwidth]{retry.png}
+            \caption{Game over screen}
+            \label{Instructions}
+        \end{figure}
+        \item \textbf{Pause (\#6): } Press P to pause the game. A pause sign appears to indicate the game is paused. Press P again to resume.
+        \item \textbf{Ghost Outline (\#7): } A gray outline shows where the current column will fall.
+    \end{enumerate}
+    \textbf{Hard features implementd (1): }
+    \begin{enumerate}
+        \item \textbf{Score (\#1): } A score counter that increases whenever you make matches. Harder difficulty has a score multiplier. Also when you have chain matches, there is a multiplier. Max score is 999.
+    \end{enumerate}
+
+
+\section{Memory Layout}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|p{6cm}|}
+\hline
+\rowcolor[HTML]{2E4057}
+\textcolor{white}{\textbf{Label}} &
+\textcolor{white}{\textbf{Type / Size}} &
+\textcolor{white}{\textbf{Initial Value}} &
+\textcolor{white}{\textbf{Purpose}} \\
+\hline
+\texttt{ADDR\_DSPL}    & \texttt{.word (4 B)}    & \texttt{0x10008000}  & Base address of bitmap display MMIO \\
+\texttt{ADDR\_KBRD}    & \texttt{.word (4 B)}    & \texttt{0xFFFF0000}  & Base address of keyboard MMIO \\
+\texttt{KEY\_A/D/../2/3}& \texttt{.word ×10}       & \texttt{0x61...0x33} & ASCII codes for each control key \\
+\texttt{FIELD\_X\_MIN} & \texttt{.word (4 B)}    & \texttt{11}          & Leftmost valid field column (x) \\
+\texttt{FIELD\_X\_MAX} & \texttt{.word (4 B)}    & \texttt{20}          & Rightmost valid field column (x) \\
+\texttt{FIELD\_Y\_MAX} & \texttt{.word (4 B)}    & \texttt{20}          & Bottom-most valid field row (y) \\
+\texttt{SLEEP\_MS}     & \texttt{.word (4 B)}    & \texttt{16}          & Frame sleep duration\\
+\texttt{FALL\_DELAY}   & \texttt{.word (4 B)}    & \texttt{40}          & Frames between automatic drops\\
+\texttt{FALL\_DELAY\_MID}   & \texttt{.word (4 B)}    & \texttt{25}          & FALL\_DELAY for medium diff\\
+\texttt{FALL\_DELAY\_HRD}   & \texttt{.word (4 B)}    & \texttt{10}          & FALL\_DELAY for hard diff\\
+\texttt{COL\_BG}       & \texttt{.word (4 B)}    & \texttt{0x111111}    & Background colour (dark grey) \\
+\texttt{COL\_WALL}     & \texttt{.word (4 B)}    & \texttt{0x888888}    & Wall and floor colour (grey) \\
+\texttt{COL\_FIELD}    & \texttt{.word (4 B)}    & \texttt{0x222222}    & Empty field cell colour \\
+\texttt{gem\_colors}   & \texttt{.word ×6 (24 B)}& \texttt{0xFF0000...} & RGB values for gem colours indexed 0--5 \\
+\texttt{SCORE}   & \texttt{.word (4 B)}& \texttt{0} & Initial Score \\
+\texttt{SCORE\_MP}   & \texttt{.word (4 B)}& \texttt{1} & Score multiplier for easy difficulty \\
+\texttt{SCORE\_MP\_MID}   & \texttt{.word (4 B)}& \texttt{2} & Score multiplier for medium difficulty \\
+\texttt{SCORE\_MP\_HRD}   & \texttt{.word (4 B)}& \texttt{3} & Score multiplier for hard difficulty \\
+\texttt{CHAIN}   & \texttt{.word (4 B)}& \texttt{1} & Chain multiplier\\
+\texttt{TIMER}   & \texttt{.word (4 B)}& \texttt{0} & Initial time, for auto\_diff \\
+
+\hline
+\end{tabular}
+\caption{Memory used}
+\label{tab:data-layout}
+\end{table}
+
+    
+
+
+
+\end{document}
