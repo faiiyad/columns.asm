@@ -1,4 +1,5 @@
 # columns.asm
+![COLUMNS](https://raw.githubusercontent.com/faiiyad/columns.asm/refs/heads/main/pictures/columns.png)
 Implementation of the original columns game using MIPS assembly.
 
 
